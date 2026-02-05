@@ -1,95 +1,215 @@
-<!-- rebuild trigger -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RNG Roller</title>
+<title>Sol's RNG Inventory</title>
 <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(180deg, #0f0f14, #1b1b26);
-    color: white;
+    background: #0f0f14;
+    color: #eaeaea;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     height: 100vh;
+}
+body.light {
+    background: #f0f0f5;
+    color: #111;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #1b1b28;
+    padding: 15px;
+    overflow-y: auto;
+}
+.sidebar h2 {
+    font-size: 18px;
+    margin-top: 0;
     text-align: center;
 }
+.sidebar ul {
+    list-style: none;
+    padding-left: 0;
+}
+.sidebar li {
+    padding: 5px 0;
+}
 
-#counter {
-    font-size: 22px;
+/* Main content */
+.main {
+    flex: 1;
     padding: 15px;
-    background: #111827;
-    border-bottom: 2px solid #00aaff;
+    overflow-y: auto;
 }
 
-#result {
-    font-size: 36px;
-    margin-top: 50px;
-    font-weight: bold;
-}
-
-#rollBtn {
-    margin: 20px;
-    padding: 18px;
-    font-size: 24px;
-    border: none;
-    border-radius: 12px;
-    background: #00aaff;
-    color: white;
+/* Buffs hover tooltip */
+.buff {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+    background: #222;
     cursor: pointer;
-    transition: transform 0.1s, background 0.2s;
+    position: relative;
+}
+.buff:hover {
+    background: #444;
+}
+.buff .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 10;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+.buff:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
-#rollBtn:active {
-    transform: scale(0.95);
-    background: #008ecc;
+/* Start menu */
+.start-menu {
+    background: #222;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.start-menu h3 {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+/* Inventory tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+th, td {
+    border: 1px solid #555;
+    padding: 5px;
+    text-align: center;
+}
+th {
+    background: #333;
+}
+
+/* Image styling */
+img {
+    width: 50px;
+    height: 50px;
 }
 </style>
 </head>
 <body>
 
-<div id="counter">Rolls: 0</div>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>Your Last Rolled Auras</h2>
+    <ul id="lastAuras">
+        <li>Celestial</li>
+        <li>Exotic</li>
+        <li>Divinus</li>
+    </ul>
+</div>
 
-<div id="result">Press Roll</div>
+<!-- Main Content -->
+<div class="main">
 
-<button id="rollBtn">ROLL</button>
+    <!-- Start Menu -->
+    <div class="start-menu">
+        <h3>Current Stats</h3>
+        <p>Final Luck: <span id="finalLuck">+350%</span></p>
+        <p>Roll Speed: <span id="rollSpeed">+40%</span></p>
+    </div>
+
+    <!-- Buffs -->
+    <h2>Active Buffs</h2>
+    <div id="buffs">
+        <div class="buff">Lucky Potion
+            <div class="tooltip">+25% Luck</div>
+        </div>
+        <div class="buff">Speed Potion
+            <div class="tooltip">+10% Roll Speed</div>
+        </div>
+        <div class="buff">Fortune Spoid II
+            <div class="tooltip">+75% Luck</div>
+        </div>
+    </div>
+
+    <!-- Inventory Example -->
+    <h2>Potions</h2>
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Potion</th>
+            <th>Effect</th>
+        </tr>
+        <tr>
+            <td><img src="https://via.placeholder.com/50" alt="Lucky Potion"></td>
+            <td>Lucky Potion</td>
+            <td>+25% Luck, 1 min</td>
+        </tr>
+        <tr>
+            <td><img src="https://via.placeholder.com/50" alt="Speed Potion"></td>
+            <td>Speed Potion</td>
+            <td>+10% Roll Speed, 1 min</td>
+        </tr>
+    </table>
+
+    <h2>Equippables</h2>
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Item</th>
+            <th>Effect</th>
+        </tr>
+        <tr>
+            <td><img src="https://via.placeholder.com/50" alt="Luck Glove"></td>
+            <td>Luck Glove</td>
+            <td>+25% Luck while equipped</td>
+        </tr>
+        <tr>
+            <td><img src="https://via.placeholder.com/50" alt="Desire Glove"></td>
+            <td>Desire Glove</td>
+            <td>+40% Luck while equipped</td>
+        </tr>
+    </table>
+
+</div>
 
 <script>
-let rolls = 0;
-
-const auras = [
-    { name: "Luminosity", weight: 2 },
-    { name: "Spectraflow", weight: 5 },
-    { name: "Guardian", weight: 8 },
-    { name: "Arcane", weight: 10 },
-    { name: "Common", weight: 100 }
+// Example dynamic data for final luck and roll speed
+let buffs = [
+    {name: "Lucky Potion", luck: 25, speed: 0},
+    {name: "Speed Potion", luck: 0, speed: 10},
+    {name: "Fortune Spoid II", luck: 75, speed: 0}
 ];
 
-function rollAura() {
-    let totalWeight = 0;
-    auras.forEach(a => totalWeight += a.weight);
-
-    let random = Math.random() * totalWeight;
-    let sum = 0;
-
-    for (let aura of auras) {
-        sum += aura.weight;
-        if (random <= sum) {
-            return aura.name;
-        }
-    }
+function updateStats() {
+    let totalLuck = 0;
+    let totalSpeed = 0;
+    buffs.forEach(b => {
+        totalLuck += b.luck;
+        totalSpeed += b.speed;
+    });
+    document.getElementById('finalLuck').textContent = `+${totalLuck}%`;
+    document.getElementById('rollSpeed').textContent = `+${totalSpeed}%`;
 }
-
-document.getElementById("rollBtn").onclick = () => {
-    rolls++;
-    document.getElementById("counter").textContent = "Rolls: " + rolls;
-
-    let rolledAura = rollAura();
-    document.getElementById("result").textContent = "You rolled: " + rolledAura;
-};
+updateStats();
 </script>
 
 </body>
