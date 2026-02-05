@@ -107,6 +107,21 @@ th {
     background: #333;
 }
 
+/* Button */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #00aaff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    margin: 10px 0;
+}
+button:hover {
+    background: #0088cc;
+}
+
 /* Image styling */
 img {
     width: 50px;
@@ -150,6 +165,10 @@ img {
         </div>
     </div>
 
+    <!-- Roll Button -->
+    <button id="rollBtn">Roll Aura</button>
+    <p id="rollResult">Click "Roll Aura" to see your result!</p>
+
     <!-- Inventory Example -->
     <h2>Potions</h2>
     <table>
@@ -192,7 +211,7 @@ img {
 </div>
 
 <script>
-// Example dynamic data for final luck and roll speed
+// Buffs and Stats
 let buffs = [
     {name: "Lucky Potion", luck: 25, speed: 0},
     {name: "Speed Potion", luck: 0, speed: 10},
@@ -210,6 +229,36 @@ function updateStats() {
     document.getElementById('rollSpeed').textContent = `+${totalSpeed}%`;
 }
 updateStats();
+
+// Aura Roll Logic
+const auras = ["Celestial", "Exotic", "Divinus", "Infernal", "Mythic", "Arcane", "Luminous"];
+const lastAuras = document.getElementById('lastAuras');
+const rollResult = document.getElementById('rollResult');
+
+function rollAura() {
+    const luckPercent = buffs.reduce((sum, b) => sum + b.luck, 0);
+    // Higher luck = higher chance to get rare auras
+    const roll = Math.random() * 100;
+    let result;
+    if (roll < 20 + luckPercent * 0.3) result = "Luminous";
+    else if (roll < 40 + luckPercent * 0.5) result = "Mythic";
+    else if (roll < 60 + luckPercent * 0.7) result = "Arcane";
+    else if (roll < 75 + luckPercent * 0.5) result = "Infernal";
+    else if (roll < 85 + luckPercent * 0.3) result = "Divinus";
+    else if (roll < 95 + luckPercent * 0.2) result = "Exotic";
+    else result = "Celestial";
+
+    // Show result
+    rollResult.textContent = `You rolled: ${result}`;
+
+    // Add to sidebar
+    const li = document.createElement('li');
+    li.textContent = result;
+    lastAuras.insertBefore(li, lastAuras.firstChild);
+    if (lastAuras.children.length > 10) lastAuras.removeChild(lastAuras.lastChild);
+}
+
+document.getElementById('rollBtn').addEventListener('click', rollAura);
 </script>
 
 </body>
