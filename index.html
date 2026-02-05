@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RNG Roller</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, #0f0f14, #1b1b26);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    text-align: center;
+}
+
+#counter {
+    font-size: 22px;
+    padding: 15px;
+    background: #111827;
+    border-bottom: 2px solid #00aaff;
+}
+
+#result {
+    font-size: 36px;
+    margin-top: 50px;
+    font-weight: bold;
+}
+
+#rollBtn {
+    margin: 20px;
+    padding: 18px;
+    font-size: 24px;
+    border: none;
+    border-radius: 12px;
+    background: #00aaff;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+#rollBtn:active {
+    transform: scale(0.95);
+    background: #008ecc;
+}
+</style>
+</head>
+<body>
+
+<div id="counter">Rolls: 0</div>
+
+<div id="result">Press Roll</div>
+
+<button id="rollBtn">ROLL</button>
+
+<script>
+let rolls = 0;
+
+const auras = [
+    { name: "Luminosity", weight: 2 },
+    { name: "Spectraflow", weight: 5 },
+    { name: "Guardian", weight: 8 },
+    { name: "Arcane", weight: 10 },
+    { name: "Common", weight: 100 }
+];
+
+function rollAura() {
+    let totalWeight = 0;
+    auras.forEach(a => totalWeight += a.weight);
+
+    let random = Math.random() * totalWeight;
+    let sum = 0;
+
+    for (let aura of auras) {
+        sum += aura.weight;
+        if (random <= sum) {
+            return aura.name;
+        }
+    }
+}
+
+document.getElementById("rollBtn").onclick = () => {
+    rolls++;
+    document.getElementById("counter").textContent = "Rolls: " + rolls;
+
+    let rolledAura = rollAura();
+    document.getElementById("result").textContent = "You rolled: " + rolledAura;
+};
+</script>
+
+</body>
+</html>
