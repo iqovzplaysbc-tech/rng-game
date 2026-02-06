@@ -1195,40 +1195,31 @@ if(randInt(1,50) === 1){
       renderInventory();
     }
 
-    function usePotion(kind){
-      if(kind === "luck"){
-        if(state.potions.luck <= 0) return;
-        state.potions.luck -= 1;
-        state.luckPotionTime += 60; // 60s each (you can change)
-        toast("Used Luck Potion (+50% luck)");
-        else if(kind === "heavenly"){
-  if(state.potions.heavenly <= 0) return;
-  state.potions.heavenly -= 1;
-  state.heavenlyPotionTime += 10; // 10 seconds recommended
-  toast("Used Heavenly Potion (+150,000% luck)");
-}
-      }else if(kind === "speed"){
-        if(state.potions.speed <= 0) return;
-        state.potions.speed -= 1;
-        state.speedPotionTime += 60; // 60s each
-        toast("Used Speed Potion (+15% roll speed)");
-      }
-      save();
-      updateUI();
-      renderInventory();
-    }
+   function usePotion(kind){
+  if(kind === "luck"){
+    if(state.potions.luck <= 0) return;
+    state.potions.luck -= 1;
+    state.luckPotionTime += 60;
+    toast("Used Luck Potion (+50% luck)");
 
-    function tickPotionTimers(dtSec){
-      if(state.luckPotionTime > 0){
-        state.luckPotionTime = Math.max(0, state.luckPotionTime - dtSec);
-      }
-      if(state.heavenlyPotionTime > 0){
-  state.heavenlyPotionTime = Math.max(0, state.heavenlyPotionTime - dtSec);
+  }else if(kind === "speed"){
+    if(state.potions.speed <= 0) return;
+    state.potions.speed -= 1;
+    state.speedPotionTime += 60;
+    toast("Used Speed Potion (+15% roll speed)");
+
+  }else if(kind === "heavenly"){
+    if(state.potions.heavenly <= 0) return;
+    state.potions.heavenly -= 1;
+    state.heavenlyPotionTime += 10;
+    toast("Used Heavenly Potion (+150,000% luck)");
+  }
+
+  save();
+  updateUI();
+  renderInventory();
 }
-      if(state.speedPotionTime > 0){
-        state.speedPotionTime = Math.max(0, state.speedPotionTime - dtSec);
-      }
-    }
+
 
     /**********************
      * 6) ROLLING / ODDS
@@ -1692,13 +1683,10 @@ if(state.heavenlyPotionTime > 0){
       const q = (document.getElementById("invSearch").value || "").toLowerCase().trim();
 
       const items = [
-        { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
-        { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed }
-        { key:"heavenly", name:"Heavenly Potion",
-  desc:"Gives you 10 seconds of [Heavenly]\n[Heavenly]: +150,000% luck",
-  qty: state.potions.heavenly
-},
-      ].filter(i => !q || i.name.toLowerCase().includes(q));
+  { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
+  { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed },
+  { key:"heavenly", name:"Heavenly Potion", desc:"Gives you 10 seconds of [Heavenly]\n[Heavenly]: +150,000% luck", qty: state.potions.heavenly }
+].filter(i => !q || i.name.toLowerCase().includes(q));
 
       grid.innerHTML = "";
       for(const it of items){
@@ -1811,6 +1799,18 @@ if(state.heavenlyPotionTime > 0){
     document.getElementById("buffSpeed").addEventListener("click", ()=>{
       if(state.potions.speed > 0) usePotion("speed");
     });
+    // Buff bar click shortcuts
+document.getElementById("buffLuck").addEventListener("click", ()=>{
+  if(state.potions.luck > 0) usePotion("luck");
+});
+
+document.getElementById("buffHeavenly").addEventListener("click", ()=>{
+  if(state.potions.heavenly > 0) usePotion("heavenly");
+});
+
+document.getElementById("buffSpeed").addEventListener("click", ()=>{
+  if(state.potions.speed > 0) usePotion("speed");
+});
 
     // Roll button
     document.getElementById("rollBtn").addEventListener("click", ()=>{
