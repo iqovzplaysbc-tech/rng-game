@@ -694,6 +694,11 @@
         <div class="x" id="buffLuckX">x0</div>
         <div class="t" id="buffLuckT">—</div>
       </div>
+      <div class="buffIcon inactive" id="buffHeavenly" title="Heavenly Potion">
+  ✨
+  <div class="x" id="buffHeavenlyX">x0</div>
+  <div class="t" id="buffHeavenlyT">—</div>
+</div>
       <div class="buffIcon inactive" id="buffSpeed" title="Speed Potion">
         ⚡
         <div class="x" id="buffSpeedX">x0</div>
@@ -979,12 +984,15 @@
       // luck / speed potion timers (seconds remaining)
       luckPotionTime: 0,
       speedPotionTime: 0,
+      heavenlyPotionTime: 0,
 
       // potion inventory
-      potions: {
-        luck: 0,
-        speed: 0
-      },
+ potions: {
+  luck: 0,
+  speed: 0,
+  heavenly: 0
+},
+
 
       // discovered / counts
       auraCounts: {},  // name -> count
@@ -1059,10 +1067,13 @@
      * 3) LUCK / SPEED
      **********************/
     // Luck Potion: +50% luck => multiplier 1.5
-    function luckMult(){
-      const potion = state.luckPotionTime > 0 ? 1.5 : 1.0;
-      return potion;
-    }
+  function luckMult(){
+  // Heavenly is so strong it should override regular luck
+  if(state.heavenlyPotionTime > 0) return 1501.0; // +150,000% luck
+  if(state.luckPotionTime > 0) return 1.5;        // +50% luck
+  return 1.0;
+}
+    
     // Speed Potion: +15% roll speed => multiplier 1.15
     function speedMult(){
       const potion = state.speedPotionTime > 0 ? 1.15 : 1.0;
@@ -1172,6 +1183,12 @@
         state.potions.speed += 1;
         toast("+1 Speed Potion");
       }
+      // Heavenly Potion 1 / 25000 every second (VERY rare)
+if(randInt(1,50) === 1){
+  state.potions.heavenly += 1;
+  toast("+1 Heavenly Potion");
+}
+
 
       save();
       updateUI();
@@ -1184,6 +1201,12 @@
         state.potions.luck -= 1;
         state.luckPotionTime += 60; // 60s each (you can change)
         toast("Used Luck Potion (+50% luck)");
+        else if(kind === "heavenly"){
+  if(state.potions.heavenly <= 0) return;
+  state.potions.heavenly -= 1;
+  state.heavenlyPotionTime += 10; // 10 seconds recommended
+  toast("Used Heavenly Potion (+150,000% luck)");
+}
       }else if(kind === "speed"){
         if(state.potions.speed <= 0) return;
         state.potions.speed -= 1;
@@ -1199,6 +1222,9 @@
       if(state.luckPotionTime > 0){
         state.luckPotionTime = Math.max(0, state.luckPotionTime - dtSec);
       }
+      if(state.heavenlyPotionTime > 0){
+  state.heavenlyPotionTime = Math.max(0, state.heavenlyPotionTime - dtSec);
+}
       if(state.speedPotionTime > 0){
         state.speedPotionTime = Math.max(0, state.speedPotionTime - dtSec);
       }
@@ -1531,6 +1557,17 @@
       // Buff icons
       const luckIcon = document.getElementById("buffLuck");
       const speedIcon = document.getElementById("buffSpeed");
+      // Heavenly buff
+const heavenlyIcon = document.getElementById("buffHeavenly");
+document.getElementById("buffHeavenlyX").textContent = "x" + state.potions.heavenly;
+
+if(state.heavenlyPotionTime > 0){
+  heavenlyIcon.classList.remove("inactive");
+  document.getElementById("buffHeavenlyT").textContent = fmtTime(state.heavenlyPotionTime);
+}else{
+  heavenlyIcon.classList.toggle("inactive", state.potions.heavenly <= 0);
+  document.getElementById("buffHeavenlyT").textContent = "—";
+}
 
       document.getElementById("buffLuckX").textContent = "x" + state.potions.luck;
       document.getElementById("buffSpeedX").textContent = "x" + state.potions.speed;
@@ -1657,6 +1694,10 @@
       const items = [
         { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
         { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed }
+        { key:"heavenly", name:"Heavenly Potion",
+  desc:"Gives you 10 seconds of [Heavenly]\n[Heavenly]: +150,000% luck",
+  qty: state.potions.heavenly
+},
       ].filter(i => !q || i.name.toLowerCase().includes(q));
 
       grid.innerHTML = "";
