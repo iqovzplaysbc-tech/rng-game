@@ -3,18 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RNG Biome Game Prototype (Full)</title>
+  <title>RNG Biome Game Prototype (FULL - FIXED)</title>
   <style>
     :root{
       --ui: rgba(0,0,0,.55);
-      --panel: rgba(0,0,0,.45);
       --text: #f2f2f2;
       --muted:#cfcfcf;
       --border: rgba(255,255,255,.18);
       --border2: rgba(255,255,255,.28);
-      --good: #56d364;
-      --bad: #ff4d4d;
-      --warn: #ffd24d;
 
       /* biome colors */
       --c-normal: #90F09A;
@@ -25,7 +21,7 @@
       --c-undefined: #3a364a;
       --c-glitched: #850605;
 
-      --whiteTint: .35; /* global, per-biome overridden */
+      --whiteTint: .35;
     }
 
     *{ box-sizing:border-box; font-family: Arial, Helvetica, sans-serif; }
@@ -80,11 +76,9 @@
       );
       mix-blend-mode: overlay;
     }
-    #glitchSlices{
-      mix-blend-mode: screen;
-    }
+    #glitchSlices{ mix-blend-mode: screen; }
 
-    /* ===== UI Layout ===== */
+    /* ===== Top bar ===== */
     #topBar{
       position:fixed; top:10px; right:10px;
       background:var(--ui);
@@ -93,14 +87,17 @@
       padding:10px 12px;
       min-width:320px;
       backdrop-filter: blur(6px);
+      z-index:5;
     }
     #topBar .row{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
     #topBar .small{ font-size:12px; color:var(--muted); }
     #topBar .strong{ font-weight:700; }
 
+    /* ===== Left bar ===== */
     #leftBar{
       position:fixed; left:10px; top:70px;
       display:flex; flex-direction:column; gap:8px;
+      z-index:5;
     }
     .iconBtn{
       width:46px; height:46px;
@@ -109,7 +106,6 @@
       border-radius:12px;
       display:grid; place-items:center;
       cursor:pointer;
-      user-select:none;
       backdrop-filter: blur(6px);
       position:relative;
     }
@@ -131,7 +127,7 @@
     }
     .iconBtn:hover .tip{ opacity:1; }
 
-    /* ===== Bottom Roll Bar ===== */
+    /* ===== Bottom roll bar ===== */
     #bottomBar{
       position:fixed; left:0; right:0; bottom:0;
       padding:12px 14px;
@@ -139,6 +135,7 @@
       align-items:flex-end;
       justify-content:space-between;
       gap:12px;
+      z-index:5;
     }
     #rollPanel{
       margin:0 auto;
@@ -226,15 +223,13 @@
     }
     .buffIcon.inactive{ opacity:.35; cursor:default; }
     .buffIcon .t{
-      position:absolute;
-      bottom:2px; right:6px;
+      position:absolute; bottom:2px; right:6px;
       font-size:11px;
       color:#fff;
       text-shadow: 0 1px 2px rgba(0,0,0,.8);
     }
     .buffIcon .x{
-      position:absolute;
-      top:2px; left:6px;
+      position:absolute; top:2px; left:6px;
       font-size:11px;
       color:#fff;
       text-shadow: 0 1px 2px rgba(0,0,0,.8);
@@ -252,6 +247,7 @@
       flex-direction:column;
       gap:10px;
       align-items:center;
+      z-index:4;
     }
     .popup{
       width:100%;
@@ -267,24 +263,10 @@
       transform: translateY(8px);
       animation: popIn .18s ease forwards;
     }
-    @keyframes popIn{
-      to{ opacity:1; transform: translateY(0); }
-    }
-    .popup .name{
-      font-weight:900;
-      font-size:18px;
-      letter-spacing:.2px;
-    }
-    .popup .rar{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:4px;
-    }
-    .popup .right{
-      text-align:right;
-      font-size:12px;
-      color:var(--muted);
-    }
+    @keyframes popIn{ to{ opacity:1; transform: translateY(0); } }
+    .popup .name{ font-weight:900; font-size:18px; }
+    .popup .rar{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .popup .right{ text-align:right; font-size:12px; color:var(--muted); }
 
     /* ===== Result panel (Quick Roll OFF) ===== */
     #resultBox{
@@ -299,16 +281,10 @@
       padding:12px 14px;
       backdrop-filter: blur(6px);
       display:none;
+      z-index:4;
     }
-    #resultBox .big{
-      font-weight:900;
-      font-size:20px;
-    }
-    #resultBox .small{
-      margin-top:6px;
-      font-size:12px;
-      color:var(--muted);
-    }
+    #resultBox .big{ font-weight:900; font-size:20px; }
+    #resultBox .small{ margin-top:6px; font-size:12px; color:var(--muted); }
 
     /* ===== Modals ===== */
     .modal{
@@ -350,11 +326,10 @@
       transform:translateX(-50%);
       font-weight:900;
       font-size:24px;
-      letter-spacing:.4px;
       pointer-events:none;
     }
 
-    /* Aura Storage layout */
+    /* Aura Storage */
     #auraModal .leftInfo{
       width:340px;
       padding:58px 14px 14px 14px;
@@ -373,11 +348,7 @@
     .infoSub{ color:var(--muted); font-size:12px; margin-top:6px; }
     .infoStat{ color:var(--muted); font-size:12px; margin-top:8px; line-height:1.35; }
 
-    .btnRow{
-      display:flex;
-      gap:10px;
-      margin-top:8px;
-    }
+    .btnRow{ display:flex; gap:10px; margin-top:8px; }
     .btn{
       flex:1;
       padding:10px 10px;
@@ -405,10 +376,7 @@
       gap:10px;
       justify-content:space-between;
     }
-    .tabs{
-      display:flex;
-      gap:8px;
-    }
+    .tabs{ display:flex; gap:8px; }
     .tab{
       padding:8px 10px;
       border-radius:12px;
@@ -421,14 +389,7 @@
       opacity:.85;
     }
     .tab.active{ opacity:1; border-color: rgba(255,255,255,.28); }
-
-    .search{
-      flex:1;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      margin-left:10px;
-    }
+    .search{ flex:1; display:flex; gap:8px; align-items:center; margin-left:10px; }
     .search input{
       width:100%;
       padding:9px 10px;
@@ -563,13 +524,9 @@
       color:#fff;
       outline:none;
     }
-    .setRow .mini{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.3;
-    }
+    .setRow .mini{ font-size:12px; color:var(--muted); line-height:1.3; }
 
-    /* Tiny toast */
+    /* Toast */
     #toast{
       position:fixed;
       left:50%;
@@ -592,7 +549,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Mobile tweaks */
+    /* Mobile */
     @media (max-width: 900px){
       #buffBar{ min-width: 220px; }
       .grid{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -628,27 +585,24 @@
     <div class="row" style="margin-top:8px; gap:8px;">
       <button class="btn" id="loginBtn" style="padding:8px 10px; font-size:13px;">Google Sign-In</button>
       <button class="btn" id="logoutBtn" style="padding:8px 10px; font-size:13px; display:none;">Logout</button>
-      <button class="btn" id="resetBtn" style="padding:8px 10px; font-size:13px; border-color: rgba(255,77,77,.35);">Reset Save</button>
+      <button class="btn bad" id="resetBtn" style="padding:8px 10px; font-size:13px;">Reset Save</button>
     </div>
     <div class="small" style="margin-top:8px; line-height:1.3;">
       Quick Roll unlock: <b>500</b> rolls • Auto Roll unlock: <b>1,500</b> rolls<br/>
-      Potions drop every second (Luck 1/5, Speed 1/7)
+      Potions: Luck 1/5 sec • Speed 1/7 sec • Heavenly 1/25000 sec
     </div>
   </div>
 
   <!-- Left Bar -->
   <div id="leftBar">
     <div class="iconBtn" id="btnAuras" title="Auras">
-      ✦
-      <div class="tip">Auras</div>
+      ✦ <div class="tip">Auras</div>
     </div>
     <div class="iconBtn" id="btnInv" title="Inventory">
-      🎒
-      <div class="tip">Items / Gears</div>
+      🎒 <div class="tip">Items</div>
     </div>
     <div class="iconBtn" id="btnSettings" title="Settings">
-      ⚙
-      <div class="tip">Settings</div>
+      ⚙ <div class="tip">Settings</div>
     </div>
   </div>
 
@@ -690,24 +644,16 @@
 
     <div id="buffBar">
       <div class="buffIcon inactive" id="buffLuck" title="Luck Potion">
-        🍀
-        <div class="x" id="buffLuckX">x0</div>
-        <div class="t" id="buffLuckT">—</div>
+        🍀 <div class="x" id="buffLuckX">x0</div><div class="t" id="buffLuckT">—</div>
+      </div>
+      <div class="buffIcon inactive" id="buffSpeed" title="Speed Potion">
+        ⚡ <div class="x" id="buffSpeedX">x0</div><div class="t" id="buffSpeedT">—</div>
       </div>
       <div class="buffIcon inactive" id="buffHeavenly" title="Heavenly Potion">
-  ✨
-  <div class="x" id="buffHeavenlyX">x0</div>
-  <div class="t" id="buffHeavenlyT">—</div>
-</div>
-      <div class="buffIcon inactive" id="buffSpeed" title="Speed Potion">
-        ⚡
-        <div class="x" id="buffSpeedX">x0</div>
-        <div class="t" id="buffSpeedT">—</div>
+        ✨ <div class="x" id="buffHeavenlyX">x0</div><div class="t" id="buffHeavenlyT">—</div>
       </div>
-      <div class="buffIcon inactive" id="buffBiome" title="Biome">
-        🌍
-        <div class="x" id="buffBiomeX">x1</div>
-        <div class="t" id="buffBiomeT">—</div>
+      <div class="buffIcon" id="buffBiome" title="Biome">
+        🌍 <div class="x" id="buffBiomeX">x1</div><div class="t" id="buffBiomeT">Normal</div>
       </div>
     </div>
   </div>
@@ -734,9 +680,7 @@
           <div class="btnRow">
             <button class="btn" id="unlockBtn">Unlock (demo)</button>
           </div>
-          <div class="infoSub" style="margin-top:8px;">
-            Demo actions: “Equip” sets your equipped aura name in the top bar.
-          </div>
+          <div class="infoSub" style="margin-top:8px;">Demo: Equip sets your name to show equipped aura.</div>
         </div>
       </div>
 
@@ -775,8 +719,8 @@
         <div class="infoBox">
           <div class="infoTitle">Luck math</div>
           <div class="infoStat" id="luckMathBox">
-            Total Luck = Base Luck × (1 + Potion Luck)<br/>
-            Roll speed = Base × (1 + Potion Speed)
+            Effective odds ≈ N / LuckMult (clamped to 1).<br/>
+            Heavenly overrides Luck potion.
           </div>
         </div>
       </div>
@@ -804,8 +748,8 @@
 
       <div class="setRow">
         <label>
-          Biome durations (seconds) — defaults if you haven’t chosen lengths yet
-          <div class="mini">You can change these anytime. Glitched does NOT roll after Glitched ends.</div>
+          Biome durations (seconds)
+          <div class="mini">Glitched does NOT roll after Glitched ends.</div>
         </label>
       </div>
 
@@ -822,14 +766,17 @@
 
       <div class="setRow">
         <label>
-          Reduced Effects (accessibility)
-          <div class="mini">Turns off heavy Glitched screen jitter and slice glitches.</div>
+          Reduced Effects
+          <div class="mini">Turns off heavy Glitched jitter and slice glitches.</div>
           <button class="btn" id="reducedFxBtn" style="width:220px;">OFF</button>
         </label>
 
         <label>
-          Music (optional in prototype)
-          <div class="mini">This prototype includes a slot to attach biome tracks. If you don’t attach, it still works.</div>
+          Music
+          <div class="mini">
+            Put MP3 files next to this HTML:
+            normal.mp3 windy.mp3 rainy.mp3 snowy.mp3 earthquake.mp3 undefined.mp3 glitched.mp3
+          </div>
           <button class="btn" id="musicBtn" style="width:220px;">Music: OFF</button>
         </label>
 
@@ -839,39 +786,58 @@
           <button class="btn good" id="saveSettingsBtn" style="width:220px;">Apply Settings</button>
         </label>
       </div>
-
-      <div class="setRow">
-        <label>
-          Firebase Auth (Google Sign-In)
-          <div class="mini">
-            To enable real Google sign-in + cloud saving, paste your Firebase config in the code block near the bottom (search for FIREBASE_CONFIG).
-            If you don't, it runs in Guest mode and saves locally.
-          </div>
-        </label>
-      </div>
     </div>
   </div>
 
-  <!-- Audio (optional): you can wire tracks here later -->
+  <!-- Audio -->
   <audio id="music" preload="auto"></audio>
 
   <script>
     /**********************
+     * HELPERS
+     **********************/
+    function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function fmtTime(sec){
+      sec = Math.max(0, Math.floor(sec));
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      return m>0 ? `${m}:${String(s).padStart(2,"0")}` : `${s}s`;
+    }
+    function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, (c)=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+    function toast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toast._to);
+      toast._to = setTimeout(()=> t.classList.remove("show"), 1200);
+    }
+    function num(id, fallback){
+      const v = Number(document.getElementById(id).value);
+      return Number.isFinite(v) ? v : fallback;
+    }
+    function getCSS(varName){
+      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
+
+    /**********************
      * 1) DATA DEFINITIONS
      **********************/
-
-    // Biomes
     const BIOMES = {
-      Normal:     { type:"base", perSecond: null, color: getCSS("--c-normal"), white: 0.40 },
-      Windy:      { type:"spawn", perSecond: 1/120, color: getCSS("--c-windy"), white: 0.45 },
-      Rainy:      { type:"spawn", perSecond: 1/180, color: getCSS("--c-rainy"), white: 0.35 },
-      Snowy:      { type:"spawn", perSecond: 1/220, color: getCSS("--c-snowy"), white: 0.58 }, // snowy is basically white tint
-      Earthquake: { type:"spawn", perSecond: 1/420, color: getCSS("--c-quake"), white: 0.30 },
-      Undefined:  { type:"spawn", perSecond: 1/999, color: getCSS("--c-undefined"), white: 0.24 },
-      Glitched:   { type:"special", perSecond: null, color: getCSS("--c-glitched"), white: 0.18 }
+      Normal:     { type:"base",   perSecond:null,  color:getCSS("--c-normal"),    white:0.40 },
+      Windy:      { type:"spawn",  perSecond:1/120, color:getCSS("--c-windy"),     white:0.45 },
+      Rainy:      { type:"spawn",  perSecond:1/180, color:getCSS("--c-rainy"),     white:0.35 },
+      Snowy:      { type:"spawn",  perSecond:1/220, color:getCSS("--c-snowy"),     white:0.58 },
+      Earthquake: { type:"spawn",  perSecond:1/420, color:getCSS("--c-quake"),     white:0.30 },
+      Undefined:  { type:"spawn",  perSecond:1/999, color:getCSS("--c-undefined"), white:0.24 },
+      Glitched:   { type:"special",perSecond:null,  color:getCSS("--c-glitched"),  white:0.18 }
     };
 
-    // Default biome durations (until you decide by music)
     const DEFAULT_DUR = {
       Windy: 60,
       Rainy: 75,
@@ -881,8 +847,7 @@
       Glitched: 25
     };
 
-    // Aura table: base odds + optional biome-specific odds
-    // (Your final list; Singularity spelling fixed)
+    // Aura list (Singularity spelling fixed)
     const AURAS = [
       { name:"Common", base:2 },
       { name:"Uncommon", base:5 },
@@ -943,7 +908,7 @@
       { name:"Cataclysm", base:125000000, biome:{ Earthquake:88888888 } },
       { name:"Stormy : Cyclone", base:177777777, biome:{ Rainy:65000000 } },
       { name:"Galaxy : Supercluster", base:200000000 },
-      { name:"Singularity", base:275000000 }, /* fixed spelling */
+      { name:"Singularity", base:275000000 },
       { name:"Aftershock", base:375500000, biome:{ Earthquake:99999999 } },
       { name:"Refraction : Prism", base:406541000 },
       { name:"Nebula", base:450000001, biome:{ Undefined:208000001 } },
@@ -957,7 +922,6 @@
       { name:"Absolute Zero", base:3000000000, biome:{ Glitched:1250000000 } }
     ];
 
-    // For UI: decide "Special" tab content (demo rule: anything with ":" or >= 10,000,000)
     function isSpecialAura(a){
       return a.name.includes(":") || a.base >= 10000000;
     }
@@ -965,7 +929,7 @@
     /**********************
      * 2) SAVE / PROFILE
      **********************/
-    const SAVE_KEY = "rng_biome_save_v1";
+    const SAVE_KEY = "rng_biome_save_fixed_v3";
 
     const state = {
       user: { mode:"guest", name:"Player (Guest)", uid:"guest" },
@@ -973,44 +937,29 @@
       rolls: 0,
       equippedAura: null,
 
-      // toggles
       quickRoll: false,
       autoRoll: false,
 
-      // roll queue (for quick roll popups)
       queue: [],
       popupActive: false,
 
-      // luck / speed potion timers (seconds remaining)
       luckPotionTime: 0,
       speedPotionTime: 0,
       heavenlyPotionTime: 0,
 
-      // potion inventory
- potions: {
-  luck: 0,
-  speed: 0,
-  heavenly: 0
-},
+      potions: { luck:0, speed:0, heavenly:0 },
 
+      auraCounts: {},
+      auraDiscoveredAt: {},
 
-      // discovered / counts
-      auraCounts: {},  // name -> count
-      auraDiscoveredAt: {}, // name -> {rolls, biome, timeISO, luckAtDiscovery}
-
-      // biome runtime
       biome: "Normal",
-      biomeEndsAt: 0, // ms timestamp (0 means no timer)
+      biomeEndsAt: 0,
 
-      // settings
       settings: {
         durations: { ...DEFAULT_DUR },
         reducedFx: false,
         musicEnabled: false
-      },
-
-      // auto roll scheduling
-      lastAutoTick: 0
+      }
     };
 
     function loadSave(){
@@ -1018,21 +967,31 @@
       if(!raw) return;
       try{
         const data = JSON.parse(raw);
-        // shallow merge
         Object.assign(state, data);
 
-        // defensive defaults
         state.queue ||= [];
-        state.potions ||= {luck:0, speed:0};
         state.auraCounts ||= {};
         state.auraDiscoveredAt ||= {};
-        state.settings ||= {durations:{...DEFAULT_DUR}, reducedFx:false, musicEnabled:false};
-        state.settings.durations ||= {...DEFAULT_DUR};
 
-        // Ensure durations has all keys
+        state.settings ||= { durations:{...DEFAULT_DUR}, reducedFx:false, musicEnabled:false };
+        state.settings.durations ||= { ...DEFAULT_DUR };
+
+        // ensure duration keys exist
         for(const k of Object.keys(DEFAULT_DUR)){
           if(typeof state.settings.durations[k] !== "number") state.settings.durations[k] = DEFAULT_DUR[k];
         }
+
+        // ensure potion keys exist
+        state.potions ||= { luck:0, speed:0, heavenly:0 };
+        state.potions.luck ??= 0;
+        state.potions.speed ??= 0;
+        state.potions.heavenly ??= 0;
+
+        state.luckPotionTime ??= 0;
+        state.speedPotionTime ??= 0;
+        state.heavenlyPotionTime ??= 0;
+
+        if(!BIOMES[state.biome]) state.biome = "Normal";
       }catch(e){
         console.warn("Save load failed", e);
       }
@@ -1049,6 +1008,7 @@
         popupActive: state.popupActive,
         luckPotionTime: state.luckPotionTime,
         speedPotionTime: state.speedPotionTime,
+        heavenlyPotionTime: state.heavenlyPotionTime,
         potions: state.potions,
         auraCounts: state.auraCounts,
         auraDiscoveredAt: state.auraDiscoveredAt,
@@ -1066,32 +1026,85 @@
     /**********************
      * 3) LUCK / SPEED
      **********************/
-    // Luck Potion: +50% luck => multiplier 1.5
-  function luckMult(){
-  // Heavenly is so strong it should override regular luck
-  if(state.heavenlyPotionTime > 0) return 1501.0; // +150,000% luck
-  if(state.luckPotionTime > 0) return 1.5;        // +50% luck
-  return 1.0;
-}
-    
-    // Speed Potion: +15% roll speed => multiplier 1.15
-    function speedMult(){
-      const potion = state.speedPotionTime > 0 ? 1.15 : 1.0;
-      return potion;
+    function luckMult(){
+      if(state.heavenlyPotionTime > 0) return 1501.0; // +150,000% luck
+      if(state.luckPotionTime > 0) return 1.5;        // +50% luck
+      return 1.0;
     }
 
-    // Roll speed: how often auto roll triggers (seconds per roll)
-    // Base auto interval = 0.9s to feel snappy.
+    function speedMult(){
+      return state.speedPotionTime > 0 ? 1.15 : 1.0;
+    }
+
     function autoIntervalMs(){
-      const base = 900; // ms
+      const base = 900;
       return Math.max(150, Math.floor(base / speedMult()));
     }
 
     /**********************
-     * 4) BIOME LOGIC
+     * 4) MUSIC
      **********************/
-    function currentBiome(){
-      return state.biome;
+    const musicEl = document.getElementById("music");
+    const MUSIC_MAP = {
+      Normal: "normal.mp3",
+      Windy: "windy.mp3",
+      Rainy: "rainy.mp3",
+      Snowy: "snowy.mp3",
+      Earthquake: "earthquake.mp3",
+      Undefined: "undefined.mp3",
+      Glitched: "glitched.mp3"
+    };
+    let currentTrack = null;
+
+    async function fadeTo(targetVol, ms=600){
+      const start = musicEl.volume;
+      const steps = 20;
+      for(let i=1;i<=steps;i++){
+        const t = i/steps;
+        musicEl.volume = start + (targetVol-start)*t;
+        await sleep(ms/steps);
+      }
+    }
+
+    async function playBiomeMusic(biome){
+      if(!state.settings.musicEnabled) return;
+
+      const fallback = MUSIC_MAP.Normal;
+      const file = MUSIC_MAP[biome] || fallback;
+
+      if(currentTrack === file && !musicEl.paused) return;
+
+      // fade out old
+      if(!musicEl.paused && musicEl.currentSrc){
+        await fadeTo(0, 450);
+        musicEl.pause();
+      }
+
+      currentTrack = file;
+      musicEl.src = file;
+      musicEl.loop = true;
+      musicEl.volume = 0;
+
+      try{
+        await musicEl.play();
+        await fadeTo(0.85, 650);
+      }catch(e){
+        toast("Audio blocked until you click Roll once (browser rule).");
+      }
+    }
+
+    async function stopMusic(){
+      if(musicEl.currentSrc){
+        await fadeTo(0, 350);
+        musicEl.pause();
+      }
+    }
+
+    /**********************
+     * 5) BIOME LOGIC
+     **********************/
+    function biomeDuration(name){
+      return state.settings.durations[name] ?? DEFAULT_DUR[name] ?? 30;
     }
 
     function setBiome(name, durationSec){
@@ -1105,10 +1118,11 @@
       applyBiomeVisuals();
       updateUI();
       save();
-    }
 
-    function biomeDuration(name){
-      return state.settings.durations[name] ?? DEFAULT_DUR[name] ?? 30;
+      // music switch
+      if(state.settings.musicEnabled){
+        playBiomeMusic(name);
+      }
     }
 
     function tickBiome(){
@@ -1121,7 +1135,6 @@
         // End -> either Glitched roll or go Normal
         // IMPORTANT: Glitched cannot roll after Glitched ends
         if(ended !== "Glitched"){
-          // roll once: 1/2500 chance
           const hitGlitched = randInt(1, 2500) === 1;
           if(hitGlitched){
             setBiome("Glitched", biomeDuration("Glitched"));
@@ -1129,14 +1142,9 @@
             return;
           }
         }
+
         setBiome("Normal", 0);
         toast(`Biome ended: ${ended}`);
-        return;
-      }
-
-      // If Normal, per-second chance to spawn another biome
-      if(state.biome === "Normal"){
-        // Each second (our game loop calls ~10fps; we will run per-second checks with a timer)
       }
     }
 
@@ -1147,15 +1155,12 @@
       if(nowSec === lastBiomeSecond) return;
       lastBiomeSecond = nowSec;
 
-      // Only spawn if Normal
       if(state.biome !== "Normal") return;
 
-      // Priority order (you can change later)
       const spawnOrder = ["Windy","Rainy","Snowy","Earthquake","Undefined"];
       for(const b of spawnOrder){
         const p = BIOMES[b].perSecond;
-        if(!p) continue;
-        if(Math.random() < p){
+        if(p && Math.random() < p){
           setBiome(b, biomeDuration(b));
           toast(`Biome started: ${b}`);
           break;
@@ -1164,7 +1169,7 @@
     }
 
     /**********************
-     * 5) POTION DROPS
+     * 6) POTIONS
      **********************/
     let lastPotionSecond = 0;
     function tickPotionDrops(){
@@ -1173,83 +1178,77 @@
       lastPotionSecond = nowSec;
 
       // Every second:
-      // Luck Potion 1/5
-      if(randInt(1,5) === 1){
-        state.potions.luck += 1;
-        toast("+1 Luck Potion");
-      }
-      // Speed Potion 1/7
-      if(randInt(1,7) === 1){
-        state.potions.speed += 1;
-        toast("+1 Speed Potion");
-      }
-      // Heavenly Potion 1 / 25000 every second (VERY rare)
-if(randInt(1,50) === 1){
-  state.potions.heavenly += 1;
-  toast("+1 Heavenly Potion");
-}
-
+      if(randInt(1,5) === 1){ state.potions.luck += 1; toast("+1 Luck Potion"); }
+      if(randInt(1,7) === 1){ state.potions.speed += 1; toast("+1 Speed Potion"); }
+      if(randInt(1,25000) === 1){ state.potions.heavenly += 1; toast("+1 Heavenly Potion"); }
 
       save();
       updateUI();
       renderInventory();
     }
 
-   function usePotion(kind){
-  if(kind === "luck"){
-    if(state.potions.luck <= 0) return;
-    state.potions.luck -= 1;
-    state.luckPotionTime += 60;
-    toast("Used Luck Potion (+50% luck)");
+    function usePotion(kind){
+      if(kind === "luck"){
+        if(state.potions.luck <= 0) return;
+        state.potions.luck -= 1;
+        state.luckPotionTime += 60;
+        toast("Used Luck Potion (+50% luck)");
 
-  }else if(kind === "speed"){
-    if(state.potions.speed <= 0) return;
-    state.potions.speed -= 1;
-    state.speedPotionTime += 60;
-    toast("Used Speed Potion (+15% roll speed)");
+      }else if(kind === "speed"){
+        if(state.potions.speed <= 0) return;
+        state.potions.speed -= 1;
+        state.speedPotionTime += 60;
+        toast("Used Speed Potion (+15% roll speed)");
 
-  }else if(kind === "heavenly"){
-    if(state.potions.heavenly <= 0) return;
-    state.potions.heavenly -= 1;
-    state.heavenlyPotionTime += 10;
-    toast("Used Heavenly Potion (+150,000% luck)");
-  }
+      }else if(kind === "heavenly"){
+        if(state.potions.heavenly <= 0) return;
+        state.potions.heavenly -= 1;
+        state.heavenlyPotionTime += 10;
+        toast("Used Heavenly Potion (+150,000% luck)");
+      }
 
-  save();
-  updateUI();
-  renderInventory();
-}
+      save();
+      updateUI();
+      renderInventory();
+    }
 
+    function tickPotionTimers(dtSec){
+      if(state.luckPotionTime > 0) state.luckPotionTime = Math.max(0, state.luckPotionTime - dtSec);
+      if(state.speedPotionTime > 0) state.speedPotionTime = Math.max(0, state.speedPotionTime - dtSec);
+      if(state.heavenlyPotionTime > 0) state.heavenlyPotionTime = Math.max(0, state.heavenlyPotionTime - dtSec);
+    }
 
     /**********************
-     * 6) ROLLING / ODDS
+     * 7) ROLLING / ODDS
      **********************/
     function auraOddsInBiome(aura, biomeName){
-      if(aura.biome && aura.biome[biomeName]){
-        return aura.biome[biomeName];
-      }
+      if(aura.biome && aura.biome[biomeName]) return aura.biome[biomeName];
       return aura.base;
     }
 
-    // Luck effect: We apply luck by reducing N (effective N = N / luckMult), clamped to >= 1.
+    // Luck effect: effective N = floor(N / luckMult), clamped >= 1
     function effectiveN(aura, biomeName){
       const N = auraOddsInBiome(aura, biomeName);
-      const eff = Math.max(1, Math.floor(N / luckMult()));
-      return eff;
+      return Math.max(1, Math.floor(N / luckMult()));
     }
 
-    // Single roll: choose best aura the player hits (rare-to-common scan)
-    // This matches the "roll each aura chance" style and feels Sol-like.
-    function doRollOnce(){
-      const biomeName = currentBiome();
+    function rarityText(aura, biomeName){
+      const base = aura.base;
+      const b = aura.biome?.[biomeName];
+      if(b && b !== base){
+        return `1 in ${fmt(base)} (Normal) • 1 in ${fmt(b)} (${biomeName})`;
+      }
+      return `1 in ${fmt(base)}`;
+    }
 
-      // increment roll counter first (to unlock toggles properly)
+    function doRollOnce(){
+      const biomeName = state.biome;
       state.rolls += 1;
 
-      // Determine winner: scan from rarest to commonest and pick first that hits
-      // Sorting by base rarity descending (bigger N = rarer)
+      // scan from rarest to commonest (higher N first)
       const sorted = [...AURAS].sort((a,b)=> (b.base - a.base));
-      let won = sorted[sorted.length-1]; // fallback common-ish (will be replaced)
+      let won = sorted[sorted.length-1];
+
       for(const aura of sorted){
         const N = effectiveN(aura, biomeName);
         if(randInt(1, N) === 1){
@@ -1258,7 +1257,6 @@ if(randInt(1,50) === 1){
         }
       }
 
-      // Save acquisition
       const name = won.name;
       state.auraCounts[name] = (state.auraCounts[name] || 0) + 1;
 
@@ -1271,28 +1269,24 @@ if(randInt(1,50) === 1){
         };
       }
 
-      // Unlock toggles based on rolls
-      // Quick Roll unlock at 500 rolls
-      // Auto Roll unlock at 1500 rolls
-      // (we don't force-enable, only unlock)
       save();
       updateUI();
       renderAuraGrid();
       return { aura: won, biome: biomeName };
     }
 
-    function rarityText(aura, biomeName){
-      const base = aura.base;
-      const b = aura.biome?.[biomeName];
-      if(b && b !== base){
-        return `1 in ${fmt(base)} (Normal) • 1 in ${fmt(b)} (${biomeName})`;
-      }
-      return `1 in ${fmt(base)}`;
+    /**********************
+     * 8) QUICK ROLL POPUPS
+     **********************/
+    function showInstantResult(result){
+      const box = document.getElementById("resultBox");
+      document.getElementById("resultName").textContent = result.aura.name;
+      document.getElementById("resultRarity").textContent = rarityText(result.aura, result.biome);
+      document.getElementById("resultExtra").textContent = `Biome: ${result.biome} • Rolls: ${fmt(state.rolls)}`;
+      box.style.display = "block";
+      setTimeout(()=>{ box.style.display = "none"; }, 1200);
     }
 
-    /**********************
-     * 7) QUICK ROLL POPUPS
-     **********************/
     function enqueueResult(result){
       state.queue.push({
         name: result.aura.name,
@@ -1302,21 +1296,12 @@ if(randInt(1,50) === 1){
       });
       updateUI();
       save();
+
       if(state.quickRoll){
         processQueue();
       }else{
         showInstantResult(result);
       }
-    }
-
-    function showInstantResult(result){
-      const box = document.getElementById("resultBox");
-      document.getElementById("resultName").textContent = result.aura.name;
-      document.getElementById("resultRarity").textContent = rarityText(result.aura, result.biome);
-      document.getElementById("resultExtra").textContent = `Biome: ${result.biome} • Rolls: ${fmt(state.rolls)}`;
-      box.style.display = "block";
-      // hide after a moment
-      setTimeout(()=>{ box.style.display = "none"; }, 1200);
     }
 
     async function processQueue(){
@@ -1342,17 +1327,14 @@ if(randInt(1,50) === 1){
         `;
         lane.prepend(el);
 
-        // Keep only latest 4 on screen
         while(lane.children.length > 4){
           lane.removeChild(lane.lastChild);
         }
 
-        // Glitched roll "burst"
         if(state.biome === "Glitched" && !state.settings.reducedFx){
           glitchBurst(180);
         }
 
-        // Show each popup one-at-a-time:
         await sleep(420);
       }
 
@@ -1362,18 +1344,19 @@ if(randInt(1,50) === 1){
     }
 
     /**********************
-     * 8) AUTO ROLL
+     * 9) AUTO ROLL
      **********************/
     let autoTimer = null;
+    let lastAutoInterval = 0;
 
     function startAutoRoll(){
-      if(autoTimer) return;
+      stopAutoRoll();
       autoTimer = setInterval(()=>{
         if(!state.autoRoll) return;
-        // One roll per interval
         const res = doRollOnce();
         enqueueResult(res);
       }, autoIntervalMs());
+      lastAutoInterval = autoIntervalMs();
     }
 
     function stopAutoRoll(){
@@ -1383,22 +1366,17 @@ if(randInt(1,50) === 1){
       }
     }
 
-    // Auto roll interval needs to adapt if speed potion active.
-    // We'll restart interval periodically.
-    let lastAutoInterval = 0;
     function maintainAutoTimer(){
       const target = autoIntervalMs();
-      if(!autoTimer && state.autoRoll) startAutoRoll();
-      if(autoTimer && (Math.abs(target - lastAutoInterval) > 10)){
-        // restart timer with new interval
-        stopAutoRoll();
-        if(state.autoRoll) startAutoRoll();
+      if(state.autoRoll && !autoTimer) startAutoRoll();
+      if(state.autoRoll && autoTimer && Math.abs(target - lastAutoInterval) > 10){
+        startAutoRoll();
       }
       lastAutoInterval = target;
     }
 
     /**********************
-     * 9) GLITCHED VISUAL EFFECTS
+     * 10) GLITCH FX
      **********************/
     const noiseCanvas = document.getElementById("glitchNoise");
     const slicesCanvas = document.getElementById("glitchSlices");
@@ -1426,12 +1404,11 @@ if(randInt(1,50) === 1){
       const d = img.data;
       for(let i=0;i<d.length;i+=4){
         const v = (Math.random()*255)|0;
-        d[i]=v; d[i+1]=v; d[i+2]=v; d[i+3]=25; // alpha
+        d[i]=v; d[i+1]=v; d[i+2]=v; d[i+3]=25;
       }
       noiseCtx.putImageData(img,0,0);
     }
 
-    // slice glitch bursts
     function glitchBurst(ms=140){
       if(state.settings.reducedFx) return;
       const w = slicesCanvas.width, h = slicesCanvas.height;
@@ -1446,7 +1423,6 @@ if(randInt(1,50) === 1){
         slicesCtx.fillStyle = "rgba(255,255,255,0.06)";
         slicesCtx.fillRect(0, y, w, sh);
 
-        // fake RGB smear strip
         slicesCtx.fillStyle = "rgba(255,0,0,0.05)";
         slicesCtx.fillRect(Math.max(0,dx), y, w, sh);
         slicesCtx.fillStyle = "rgba(0,255,255,0.05)";
@@ -1459,7 +1435,6 @@ if(randInt(1,50) === 1){
       }, ms);
     }
 
-    // jitter pulses
     let nextJitterAt = 0;
     function tickJitter(){
       if(state.biome !== "Glitched") {
@@ -1475,12 +1450,11 @@ if(randInt(1,50) === 1){
       const dy = randInt(-5,5);
       const rot = (Math.random()*1.2 - 0.6).toFixed(3);
       document.body.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
-
       setTimeout(()=>{ document.body.style.transform = ""; }, randInt(80, 160));
     }
 
     /**********************
-     * 10) BIOME VISUALS
+     * 11) BIOME VISUALS
      **********************/
     function applyBiomeVisuals(){
       const b = state.biome;
@@ -1489,7 +1463,6 @@ if(randInt(1,50) === 1){
 
       bc.style.backgroundColor = BIOMES[b].color;
 
-      // Snowy: basically white tint only
       if(b === "Snowy"){
         bc.style.opacity = "0.02";
         wo.style.opacity = String(BIOMES[b].white);
@@ -1498,7 +1471,6 @@ if(randInt(1,50) === 1){
         wo.style.opacity = String(BIOMES[b].white);
       }
 
-      // Glitched effects
       if(b === "Glitched"){
         setGlitchFxEnabled(true);
       }else{
@@ -1507,12 +1479,11 @@ if(randInt(1,50) === 1){
         document.body.style.transform = "";
       }
 
-      // Update biome buff icon label
       document.getElementById("buffBiomeT").textContent = b;
     }
 
     /**********************
-     * 11) UI RENDERING
+     * 12) UI RENDERING
      **********************/
     function updateUI(){
       document.getElementById("playerName").textContent =
@@ -1529,7 +1500,7 @@ if(randInt(1,50) === 1){
         document.getElementById("biomeTime").textContent = left + "s";
       }
 
-      // toggles (unlock logic)
+      // unlock logic
       const quickUnlocked = state.rolls >= 500;
       const autoUnlocked = state.rolls >= 1500;
 
@@ -1548,20 +1519,11 @@ if(randInt(1,50) === 1){
       // Buff icons
       const luckIcon = document.getElementById("buffLuck");
       const speedIcon = document.getElementById("buffSpeed");
-      // Heavenly buff
-const heavenlyIcon = document.getElementById("buffHeavenly");
-document.getElementById("buffHeavenlyX").textContent = "x" + state.potions.heavenly;
-
-if(state.heavenlyPotionTime > 0){
-  heavenlyIcon.classList.remove("inactive");
-  document.getElementById("buffHeavenlyT").textContent = fmtTime(state.heavenlyPotionTime);
-}else{
-  heavenlyIcon.classList.toggle("inactive", state.potions.heavenly <= 0);
-  document.getElementById("buffHeavenlyT").textContent = "—";
-}
+      const heavenlyIcon = document.getElementById("buffHeavenly");
 
       document.getElementById("buffLuckX").textContent = "x" + state.potions.luck;
       document.getElementById("buffSpeedX").textContent = "x" + state.potions.speed;
+      document.getElementById("buffHeavenlyX").textContent = "x" + state.potions.heavenly;
 
       if(state.luckPotionTime > 0){
         luckIcon.classList.remove("inactive");
@@ -1579,14 +1541,16 @@ if(state.heavenlyPotionTime > 0){
         document.getElementById("buffSpeedT").textContent = "—";
       }
 
-      // biome icon always active
-      document.getElementById("buffBiome").classList.remove("inactive");
-      document.getElementById("buffBiomeX").textContent = "x1";
+      if(state.heavenlyPotionTime > 0){
+        heavenlyIcon.classList.remove("inactive");
+        document.getElementById("buffHeavenlyT").textContent = fmtTime(state.heavenlyPotionTime);
+      }else{
+        heavenlyIcon.classList.toggle("inactive", state.potions.heavenly <= 0);
+        document.getElementById("buffHeavenlyT").textContent = "—";
+      }
 
-      // login buttons
-      const isGuest = state.user.mode === "guest";
-      document.getElementById("loginBtn").style.display = isGuest ? "block" : "none";
-      document.getElementById("logoutBtn").style.display = isGuest ? "none" : "block";
+      // biome icon always active
+      document.getElementById("buffBiomeX").textContent = "x1";
 
       // settings UI
       document.getElementById("durWindy").value = state.settings.durations.Windy;
@@ -1598,6 +1562,11 @@ if(state.heavenlyPotionTime > 0){
 
       document.getElementById("reducedFxBtn").textContent = state.settings.reducedFx ? "ON" : "OFF";
       document.getElementById("musicBtn").textContent = "Music: " + (state.settings.musicEnabled ? "ON" : "OFF");
+
+      // login buttons (stub)
+      const isGuest = state.user.mode === "guest";
+      document.getElementById("loginBtn").style.display = isGuest ? "block" : "none";
+      document.getElementById("logoutBtn").style.display = isGuest ? "none" : "block";
     }
 
     function renderAuraGrid(){
@@ -1605,8 +1574,9 @@ if(state.heavenlyPotionTime > 0){
       const q = (document.getElementById("auraSearch").value || "").toLowerCase().trim();
       const showSpecial = document.getElementById("tabSpecial").classList.contains("active");
 
-      const list = AURAS.filter(a => showSpecial ? isSpecialAura(a) : !isSpecialAura(a))
-                        .filter(a => !q || a.name.toLowerCase().includes(q));
+      const list = AURAS
+        .filter(a => showSpecial ? isSpecialAura(a) : !isSpecialAura(a))
+        .filter(a => !q || a.name.toLowerCase().includes(q));
 
       grid.innerHTML = "";
 
@@ -1634,33 +1604,25 @@ if(state.heavenlyPotionTime > 0){
         grid.appendChild(slot);
       }
 
-      // count label
       const discoveredCount = Object.keys(state.auraCounts).length;
-      document.getElementById("auraCountLabel").textContent =
-        `${discoveredCount} / ${AURAS.length}`;
+      document.getElementById("auraCountLabel").textContent = `${discoveredCount} / ${AURAS.length}`;
     }
 
     let selectedAuraName = null;
     function selectAura(name){
       selectedAuraName = name;
-      // highlight
-      const slots = document.querySelectorAll(".slot");
-      slots.forEach(s=> s.classList.toggle("selected", s.dataset.name === name));
+      document.querySelectorAll(".slot").forEach(s=> s.classList.toggle("selected", s.dataset.name === name));
 
       const aura = AURAS.find(a=>a.name===name);
       const discovered = !!state.auraCounts[name];
-      const infoName = document.getElementById("auraInfoName");
-      const infoStats = document.getElementById("auraInfoStats");
-      const infoSub = document.getElementById("auraInfoSub");
 
-      infoName.textContent = discovered ? name : "(Locked)";
-      infoSub.textContent = discovered ? "Information" : "This aura is locked (not discovered).";
+      document.getElementById("auraInfoName").textContent = discovered ? name : "(Locked)";
+      document.getElementById("auraInfoSub").textContent = discovered ? "Information" : "This aura is locked (not discovered).";
 
       if(discovered){
         const meta = state.auraDiscoveredAt[name];
         const lines = [];
         lines.push(`Rarity: 1 in ${fmt(aura.base)}`);
-        // show biome odds if any
         if(aura.biome){
           for(const [b, n] of Object.entries(aura.biome)){
             lines.push(`Native in ${b}: 1 in ${fmt(n)}`);
@@ -1672,9 +1634,9 @@ if(state.heavenlyPotionTime > 0){
           lines.push(`Biome discovered: ${meta.biome}`);
           lines.push(`Time discovered: ${new Date(meta.timeISO).toLocaleString()}`);
         }
-        infoStats.innerHTML = lines.map(x=>escapeHtml(x)).join("<br/>");
+        document.getElementById("auraInfoStats").innerHTML = lines.map(escapeHtml).join("<br/>");
       }else{
-        infoStats.textContent = `Rarity: 1 in ${fmt(aura.base)}`;
+        document.getElementById("auraInfoStats").textContent = `Rarity: 1 in ${fmt(aura.base)}`;
       }
     }
 
@@ -1683,10 +1645,10 @@ if(state.heavenlyPotionTime > 0){
       const q = (document.getElementById("invSearch").value || "").toLowerCase().trim();
 
       const items = [
-  { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
-  { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed },
-  { key:"heavenly", name:"Heavenly Potion", desc:"Gives you 10 seconds of [Heavenly]\n[Heavenly]: +150,000% luck", qty: state.potions.heavenly }
-].filter(i => !q || i.name.toLowerCase().includes(q));
+        { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
+        { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed },
+        { key:"heavenly", name:"Heavenly Potion", desc:"Gives you 10 seconds of [Heavenly]\n[Heavenly]: +150,000% luck", qty: state.potions.heavenly }
+      ].filter(i => !q || i.name.toLowerCase().includes(q));
 
       grid.innerHTML = "";
       for(const it of items){
@@ -1704,13 +1666,11 @@ if(state.heavenlyPotionTime > 0){
       selectedItemKey = item.key;
       document.getElementById("invItemName").textContent = item.name;
       document.getElementById("invItemDesc").textContent = item.desc;
-      const canUse = item.qty > 0;
-      const btn = document.getElementById("useItemBtn");
-      btn.disabled = !canUse;
+      document.getElementById("useItemBtn").disabled = !(item.qty > 0);
     }
 
     /**********************
-     * 12) MODALS / EVENTS
+     * 13) MODALS / EVENTS
      **********************/
     function openModal(id){
       document.getElementById(id).style.display = "flex";
@@ -1734,19 +1694,15 @@ if(state.heavenlyPotionTime > 0){
 
     // Tabs
     document.getElementById("tabRegular").addEventListener("click", ()=>{
-      setTab("aura", "regular");
+      document.getElementById("tabRegular").classList.add("active");
+      document.getElementById("tabSpecial").classList.remove("active");
+      renderAuraGrid();
     });
     document.getElementById("tabSpecial").addEventListener("click", ()=>{
-      setTab("aura", "special");
+      document.getElementById("tabSpecial").classList.add("active");
+      document.getElementById("tabRegular").classList.remove("active");
+      renderAuraGrid();
     });
-
-    function setTab(kind, which){
-      if(kind === "aura"){
-        document.getElementById("tabRegular").classList.toggle("active", which==="regular");
-        document.getElementById("tabSpecial").classList.toggle("active", which==="special");
-        renderAuraGrid();
-      }
-    }
 
     // Aura actions
     document.getElementById("equipBtn").addEventListener("click", ()=>{
@@ -1762,7 +1718,6 @@ if(state.heavenlyPotionTime > 0){
       save(); updateUI();
     });
     document.getElementById("unlockBtn").addEventListener("click", ()=>{
-      // demo unlock: marks selected aura as discovered once
       if(!selectedAuraName) return;
       if(state.auraCounts[selectedAuraName]) return toast("Already discovered.");
       state.auraCounts[selectedAuraName] = 1;
@@ -1782,14 +1737,7 @@ if(state.heavenlyPotionTime > 0){
     document.getElementById("useItemBtn").addEventListener("click", ()=>{
       if(!selectedItemKey) return;
       usePotion(selectedItemKey);
-      // refresh selected item display
       renderInventory();
-      const items = [
-        { key:"luck", name:"Luck Potion", desc:"Gives you 1 minute of [Lucky]\n[Lucky]: +50% luck", qty: state.potions.luck },
-        { key:"speed", name:"Speed Potion", desc:"Gives you 1 minute of [Speed]\n[Speed]: +15% roll speed", qty: state.potions.speed }
-      ];
-      const it = items.find(x=>x.key===selectedItemKey);
-      if(it) selectItem(it);
     });
 
     // Buff bar click shortcuts
@@ -1799,26 +1747,22 @@ if(state.heavenlyPotionTime > 0){
     document.getElementById("buffSpeed").addEventListener("click", ()=>{
       if(state.potions.speed > 0) usePotion("speed");
     });
-    // Buff bar click shortcuts
-document.getElementById("buffLuck").addEventListener("click", ()=>{
-  if(state.potions.luck > 0) usePotion("luck");
-});
+    document.getElementById("buffHeavenly").addEventListener("click", ()=>{
+      if(state.potions.heavenly > 0) usePotion("heavenly");
+    });
 
-document.getElementById("buffHeavenly").addEventListener("click", ()=>{
-  if(state.potions.heavenly > 0) usePotion("heavenly");
-});
-
-document.getElementById("buffSpeed").addEventListener("click", ()=>{
-  if(state.potions.speed > 0) usePotion("speed");
-});
-
-    // Roll button
+    // Roll button (also helps unlock browser audio)
     document.getElementById("rollBtn").addEventListener("click", ()=>{
       const res = doRollOnce();
       enqueueResult(res);
 
       // tiny glitched burst on roll
       if(state.biome === "Glitched") glitchBurst(160);
+
+      // if music enabled, ensure it starts after interaction
+      if(state.settings.musicEnabled){
+        playBiomeMusic(state.biome);
+      }
     });
 
     // Quick toggle
@@ -1838,7 +1782,7 @@ document.getElementById("buffSpeed").addEventListener("click", ()=>{
       toast("Auto Roll: " + (state.autoRoll ? "ON" : "OFF"));
       save();
       updateUI();
-      if(state.autoRoll) startAutoRoll();
+      if(state.autoRoll) startAutoRoll(); else stopAutoRoll();
     });
 
     // Settings
@@ -1848,14 +1792,19 @@ document.getElementById("buffSpeed").addEventListener("click", ()=>{
       save(); updateUI();
     });
 
-    document.getElementById("musicBtn").addEventListener("click", ()=>{
+    document.getElementById("musicBtn").addEventListener("click", async ()=>{
       state.settings.musicEnabled = !state.settings.musicEnabled;
       toast("Music: " + (state.settings.musicEnabled ? "ON" : "OFF"));
       save(); updateUI();
+
+      if(state.settings.musicEnabled){
+        await playBiomeMusic(state.biome);
+      }else{
+        await stopMusic();
+      }
     });
 
     document.getElementById("saveSettingsBtn").addEventListener("click", ()=>{
-      // pull input values
       const d = state.settings.durations;
       d.Windy = num("durWindy", d.Windy);
       d.Rainy = num("durRainy", d.Rainy);
@@ -1874,20 +1823,21 @@ document.getElementById("buffSpeed").addEventListener("click", ()=>{
       if(confirm("Reset ALL saved data?")) resetSave();
     });
 
-    /**********************
-     * 13) GOOGLE SIGN-IN (Firebase optional)
-     **********************/
-    // This wiring is complete, but needs Firebase config to actually work.
-    // If you add Firebase, it will override Guest and sync name/uid.
+    // Google Sign-In (stub)
     document.getElementById("loginBtn").addEventListener("click", async ()=>{
-      toast("Firebase not configured in this prototype file yet. Running as Guest.");
-      // If you configure Firebase below, this button will work.
+      toast("Firebase not configured in this prototype. Running as Guest.");
     });
     document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-      // If Firebase exists, sign out; otherwise set guest
       state.user = { mode:"guest", name:"Player (Guest)", uid:"guest" };
       toast("Logged out (Guest mode)");
       save(); updateUI();
+    });
+
+    // Close modals by clicking outside card
+    document.querySelectorAll(".modal").forEach(m=>{
+      m.addEventListener("click",(e)=>{
+        if(e.target === m) m.style.display="none";
+      });
     });
 
     /**********************
@@ -1899,92 +1849,34 @@ document.getElementById("buffSpeed").addEventListener("click", ()=>{
       const dt = Math.min(0.25, (now - lastFrame)/1000);
       lastFrame = now;
 
-      // timers
       tickPotionTimers(dt);
-
-      // biome logic
       tickBiome();
       tickBiomePerSecond();
-
-      // potion drops
       tickPotionDrops();
-
-      // auto roll timer adapt
       maintainAutoTimer();
 
-      // glitched visuals
       if(state.biome === "Glitched"){
         drawNoise();
         tickJitter();
-        // occasional slice glitch
         if(!state.settings.reducedFx && Math.random() < 0.004){
           glitchBurst(randInt(80, 140));
         }
       }
 
-      // UI refresh (lightweight)
       updateUI();
-
       requestAnimationFrame(frame);
     }
 
     /**********************
-     * 15) HELPERS
-     **********************/
-    function randInt(min, max){
-      return Math.floor(Math.random()*(max-min+1))+min;
-    }
-    function fmt(n){
-      return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-    function fmtTime(sec){
-      sec = Math.max(0, Math.floor(sec));
-      const m = Math.floor(sec/60);
-      const s = sec%60;
-      return m>0 ? `${m}:${String(s).padStart(2,"0")}` : `${s}s`;
-    }
-    function sleep(ms){
-      return new Promise(r=>setTimeout(r, ms));
-    }
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, (c)=>({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-    function toast(msg){
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      clearTimeout(toast._to);
-      toast._to = setTimeout(()=> t.classList.remove("show"), 1200);
-    }
-    function num(id, fallback){
-      const v = Number(document.getElementById(id).value);
-      return Number.isFinite(v) ? v : fallback;
-    }
-    function getCSS(varName){
-      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-    }
-
-    /**********************
-     * 16) INIT
+     * 15) INIT
      **********************/
     function init(){
       loadSave();
       resizeFx();
 
-      // Apply current biome visuals
       if(!BIOMES[state.biome]) state.biome = "Normal";
       applyBiomeVisuals();
 
-      // Wire modal background click (close if click outside card)
-      document.querySelectorAll(".modal").forEach(m=>{
-        m.addEventListener("click",(e)=>{
-          if(e.target === m) m.style.display="none";
-        });
-      });
-
-      // Start auto roll timer if ON (from save)
       if(state.autoRoll) startAutoRoll();
 
       updateUI();
@@ -1993,24 +1885,8 @@ document.getElementById("buffSpeed").addEventListener("click", ()=>{
 
       requestAnimationFrame(frame);
     }
+
     init();
   </script>
-
-  <!--
-    ================================
-    FIREBASE_CONFIG (OPTIONAL)
-    ================================
-    If you want REAL Google Sign-In:
-    1) Create a Firebase project
-    2) Enable Authentication -> Google
-    3) Add a Web App and copy config
-    4) Add Firebase CDN scripts and initialize
-    5) Replace the loginBtn click handler to use GoogleAuthProvider
-    6) Optionally sync saves to Firestore per uid
-
-    I can paste the exact Firebase code once you tell me:
-    - Are you hosting on a domain (Netlify/Vercel) or local?
-    - Do you want Firestore saving or just Auth?
-  -->
 </body>
 </html>
